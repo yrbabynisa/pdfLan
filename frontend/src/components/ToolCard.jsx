@@ -1,5 +1,6 @@
 import { Link } from 'react-router-dom';
 import { ArrowRight, Star } from 'lucide-react';
+import { ActionIcon } from '@mantine/core';
 import { ToolIconBadge } from './ToolIcon';
 
 /**
@@ -17,6 +18,23 @@ export default function ToolCard({
   onToggleFavorite,
 }) {
   const isMaintenance = tool.maintenance;
+
+  const FavoriteButton = (
+    <ActionIcon
+      variant="subtle"
+      color={isFavorite ? 'yellow' : 'gray'}
+      size="sm"
+      aria-label={isFavorite ? 'Hapus dari favorit' : 'Tambah ke favorit'}
+      aria-pressed={isFavorite}
+      onClick={(e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        onToggleFavorite(tool.id);
+      }}
+    >
+      <Star className="w-3.5 h-3.5" style={{ fill: isFavorite ? 'currentColor' : 'none' }} />
+    </ActionIcon>
+  );
 
   // ── List view row ────────────────────────────────────────────────
   if (viewMode === 'list') {
@@ -49,22 +67,7 @@ export default function ToolCard({
         </Link>
 
         <div className="flex items-center gap-2 shrink-0">
-          {onToggleFavorite && (
-            <button
-              type="button"
-              onClick={(e) => {
-                e.preventDefault();
-                e.stopPropagation();
-                onToggleFavorite(tool.id);
-              }}
-              className={`p-1.5 rounded hover:bg-[#1c2030] transition-colors ${
-                isFavorite ? 'text-amber-400' : 'text-[#4a5070] hover:text-amber-400'
-              }`}
-              title={isFavorite ? 'Hapus dari favorit' : 'Tambah ke favorit'}
-            >
-              <Star className={`w-3.5 h-3.5 ${isFavorite ? 'fill-amber-400' : ''}`} />
-            </button>
-          )}
+          {onToggleFavorite && FavoriteButton}
           {!isMaintenance && (
             <Link
               to={tool.route}
@@ -79,18 +82,47 @@ export default function ToolCard({
   }
 
   // ── Grid view card ───────────────────────────────────────────────
+  // Wrapper div agar tombol favorit (ActionIcon) jadi *sibling* Link, bukan
+  // nested di dalamnya — memperbaiki bug a11y button-inside-anchor.
   return (
-    <Link
-      to={isMaintenance ? '#' : tool.route}
-      id={`tool-card-${tool.id}`}
-      className={`group relative flex flex-col justify-between p-4 rounded-lg bg-[#131622] border border-[#232738]
-        transition-colors duration-150
-        ${isMaintenance 
-          ? 'opacity-50 cursor-not-allowed' 
-          : 'hover:border-[#383e58] hover:bg-[#181c2b] cursor-pointer'}`}
-      onClick={(e) => isMaintenance && e.preventDefault()}
-    >
-      {/* Top action row: Maintenance badge & Star */}
+    <div className="group relative">
+      <Link
+        to={isMaintenance ? '#' : tool.route}
+        id={`tool-card-${tool.id}`}
+        className={`relative flex flex-col justify-between p-4 rounded-lg bg-[#131622] border border-[#232738]
+          transition-colors duration-150
+          ${isMaintenance
+            ? 'opacity-50 cursor-not-allowed'
+            : 'hover:border-[#383e58] hover:bg-[#181c2b] cursor-pointer'}`}
+        onClick={(e) => isMaintenance && e.preventDefault()}
+      >
+        <div>
+          {/* Icon */}
+          <div className="mb-3">
+            <ToolIconBadge tool={tool} size="md" className={isMaintenance ? 'grayscale opacity-50' : ''} />
+          </div>
+
+          {/* Content */}
+          <div>
+            <h3 className={`text-xs font-semibold mb-1 transition-colors pr-14
+              ${isMaintenance ? 'text-[#8b90b0]' : 'text-white'}`}>
+              {tool.name}
+            </h3>
+            <p className={`text-[11px] leading-relaxed line-clamp-2 ${isMaintenance ? 'text-[#4a5070]' : 'text-[#8b90b0]'}`}>
+              {tool.desc}
+            </p>
+          </div>
+        </div>
+
+        {/* Footer / Arrow */}
+        {!isMaintenance && (
+          <div className="flex justify-end items-center mt-3 pt-2 border-t border-[#232738]/40">
+            <ArrowRight className="w-3.5 h-3.5 text-[#4a5070] group-hover:text-[#8b90b0] transition-colors" />
+          </div>
+        )}
+      </Link>
+
+      {/* Top-right: badge maintenance + tombol favorit — sibling Link (a11y valid) */}
       <div className="absolute top-3 right-3 flex items-center gap-1.5 z-10">
         {isMaintenance && (
           <div className="px-1.5 py-0.5 bg-amber-500/10 border border-amber-500/20 text-amber-400 text-[10px] font-mono font-medium rounded">
@@ -98,49 +130,11 @@ export default function ToolCard({
           </div>
         )}
         {onToggleFavorite && (
-          <button
-            type="button"
-            onClick={(e) => {
-              e.preventDefault();
-              e.stopPropagation();
-              onToggleFavorite(tool.id);
-            }}
-            className={`p-1 rounded transition-colors ${
-              isFavorite
-                ? 'text-amber-400 opacity-100'
-                : 'text-[#4a5070] opacity-100 md:opacity-0 md:group-hover:opacity-100 focus-visible:opacity-100 hover:text-amber-400'
-            }`}
-            title={isFavorite ? 'Hapus dari favorit' : 'Tambah ke favorit'}
-          >
-            <Star className={`w-3.5 h-3.5 ${isFavorite ? 'fill-amber-400' : ''}`} />
-          </button>
+          <div className={`${isFavorite ? 'opacity-100' : 'opacity-100 md:opacity-0 md:group-hover:opacity-100 focus-within:opacity-100'}`}>
+            {FavoriteButton}
+          </div>
         )}
       </div>
-
-      <div>
-        {/* Icon */}
-        <div className="mb-3">
-          <ToolIconBadge tool={tool} size="md" className={isMaintenance ? 'grayscale opacity-50' : ''} />
-        </div>
-
-        {/* Content */}
-        <div>
-          <h3 className={`text-xs font-semibold mb-1 transition-colors pr-14
-            ${isMaintenance ? 'text-[#8b90b0]' : 'text-white'}`}>
-            {tool.name}
-          </h3>
-          <p className={`text-[11px] leading-relaxed line-clamp-2 ${isMaintenance ? 'text-[#4a5070]' : 'text-[#8b90b0]'}`}>
-            {tool.desc}
-          </p>
-        </div>
-      </div>
-
-      {/* Footer / Arrow */}
-      {!isMaintenance && (
-        <div className="flex justify-end items-center mt-3 pt-2 border-t border-[#232738]/40">
-          <ArrowRight className="w-3.5 h-3.5 text-[#4a5070] group-hover:text-[#8b90b0] transition-colors" />
-        </div>
-      )}
-    </Link>
+    </div>
   );
 }

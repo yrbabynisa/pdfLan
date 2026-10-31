@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { Checkbox, Grid, PasswordInput, Stack, Text } from '@mantine/core';
 import ToolLayout from '../../components/ToolLayout';
 import useToolStore from '../../store/useToolStore';
 import { apiProtect } from '../../utils/api';
@@ -43,32 +44,24 @@ export default function ProtectPdf() {
       onProcess={handleProcess}
       actionLabel="Proteksi PDF"
       options={
-        <div className="space-y-4">
-          <div className="grid grid-cols-2 gap-3">
-            <div>
-              <label className="block text-sm text-text-muted mb-1">Password User *</label>
-              <input type="password" value={userPass} onChange={(e) => setUserPass(e.target.value)}
-                placeholder="Password untuk membuka"
-                className="w-full px-4 py-2.5 bg-surface-hover border border-border rounded-xl text-white focus:outline-none focus:border-[#e2001a]/50 text-sm" />
-            </div>
-            <div>
-              <label className="block text-sm text-text-muted mb-1">Password Owner (opsional)</label>
-              <input type="password" value={ownerPass} onChange={(e) => setOwnerPass(e.target.value)}
-                placeholder="Password pemilik"
-                className="w-full px-4 py-2.5 bg-surface-hover border border-border rounded-xl text-white focus:outline-none focus:border-[#e2001a]/50 text-sm" />
-            </div>
-          </div>
+        <Stack gap="md">
+          <Grid>
+            <Grid.Col span={6}>
+              <PasswordInput label="Password User" withAsterisk placeholder="Password untuk membuka" value={userPass} onChange={(e) => setUserPass(e.currentTarget.value)} />
+            </Grid.Col>
+            <Grid.Col span={6}>
+              <PasswordInput label="Password Owner (opsional)" placeholder="Password pemilik" value={ownerPass} onChange={(e) => setOwnerPass(e.currentTarget.value)} />
+            </Grid.Col>
+          </Grid>
           <div>
-            <label className="block text-sm text-text-muted mb-2">Izinkan pengguna untuk:</label>
-            {[{ k: 'print', label: 'Mencetak (Print)' }, { k: 'copy', label: 'Menyalin teks (Copy)' }, { k: 'edit', label: 'Mengedit konten' }].map(({ k, label }) => (
-              <label key={k} className="flex items-center gap-2 mb-2 cursor-pointer">
-                <input type="checkbox" checked={perms[k]} onChange={(e) => setPerms((p) => ({ ...p, [k]: e.target.checked }))}
-                  className="accent-[#e2001a]" />
-                <span className="text-sm text-white">{label}</span>
-              </label>
-            ))}
+            <Text size="sm" c="dimmed" mb={6}>Izinkan pengguna untuk:</Text>
+            <Stack gap={6}>
+              {[{ k: 'print', label: 'Mencetak (Print)' }, { k: 'copy', label: 'Menyalin teks (Copy)' }, { k: 'edit', label: 'Mengedit konten' }].map(({ k, label }) => (
+                <Checkbox key={k} label={label} checked={perms[k]} onChange={(e) => setPerms((p) => ({ ...p, [k]: e.currentTarget.checked }))} />
+              ))}
+            </Stack>
           </div>
-        </div>
+        </Stack>
       }
     />
   );

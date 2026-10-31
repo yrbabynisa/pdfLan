@@ -1,8 +1,7 @@
 import { BrowserRouter, Routes, Route, useLocation } from 'react-router-dom';
-import { GooeyToaster, gooeyToast } from 'goey-toast';
-import 'goey-toast/styles.css';
-import { lazy, Suspense, useEffect, useRef } from 'react';
+import { lazy, Suspense, useEffect } from 'react';
 import { Loader } from '@mantine/core';
+import { notifications } from '@mantine/notifications';
 import Navbar from './components/Navbar';
 import Footer from './components/Footer';
 import ErrorBoundary from './components/ErrorBoundary';
@@ -86,32 +85,30 @@ function StoreResetter() {
 function ToastNotifier() {
   const error = useToolStore((state) => state.error);
   const isProcessing = useToolStore((state) => state.isProcessing);
-  const toastIdRef = useRef(null);
 
   useEffect(() => {
     if (isProcessing) {
-      toastIdRef.current = gooeyToast('Sedang memproses...', {
-        id: 'global-process-toast',
+      notifications.show({
+        id: 'global-process',
+        message: 'Sedang memproses...',
+        loading: true,
+        autoClose: false,
+        withCloseButton: false,
       });
     }
   }, [isProcessing]);
 
   useEffect(() => {
     if (error && !isProcessing) {
-      if (toastIdRef.current) {
-        gooeyToast.update(toastIdRef.current, {
-          title: 'Gagal diproses',
-          description: typeof error === 'string' ? error : 'Terjadi kesalahan sistem',
-          type: 'error',
-          action: {
-            label: 'Tutup',
-            onClick: () => gooeyToast.dismiss('global-process-toast')
-          }
-        });
-        toastIdRef.current = null;
-      } else {
-        gooeyToast.error('Gagal diproses', { description: typeof error === 'string' ? error : 'Terjadi kesalahan sistem' });
-      }
+      // show() dengan id yang sama → menggantikan toast loading menjadi error.
+      notifications.show({
+        id: 'global-process',
+        title: 'Gagal diproses',
+        message: typeof error === 'string' ? error : 'Terjadi kesalahan sistem',
+        color: 'red',
+        autoClose: 6000,
+        withCloseButton: true,
+      });
     }
   }, [error, isProcessing]);
 
@@ -166,13 +163,6 @@ export default function App() {
           </ErrorBoundary>
         </main>
         <Footer />
-        <GooeyToaster
-          position="top-center"
-          theme="dark"
-          preset="bouncy"
-          showProgress={true}
-          closeButton="top-right"
-        />
       </div>
     </BrowserRouter>
   );

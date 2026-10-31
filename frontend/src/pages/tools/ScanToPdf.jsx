@@ -5,7 +5,7 @@ import ToolLayout from '../../components/ToolLayout';
 import useToolStore from '../../store/useToolStore';
 import { downloadBlob, validateFiles } from '../../utils/fileHelpers';
 import { detectCorners, perspectiveTransform, applyCanvasEffects } from '../../utils/scannerMath';
-import { toast } from 'sonner';
+import { notifications } from '@mantine/notifications';
 
 const CORNER_COLORS = ['#e05555','#5cb870','#4a9ede','#daa04e'];
 const GRAB_RADIUS = 18;
@@ -317,7 +317,7 @@ export default function ScanToPdf() {
             img.src = page.dataUrl;
           });
         }
-        toast.success(`${scannedPages.length} halaman JPEG berhasil diunduh!`);
+        notifications.show({ message: `${scannedPages.length} halaman JPEG berhasil diunduh!`, color: 'green' });
         useToolStore.setState({ isProcessing: false });
       }
       setScannedPages([]);

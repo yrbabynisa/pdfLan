@@ -1,5 +1,5 @@
 import { CheckCircle, Download, AlertCircle, ChevronLeft, ArrowLeft, ChevronRight, Search, Eye, Trash2, Copy, Check, Loader2, XCircle, FileArchive } from 'lucide-react';
-import { gooeyToast } from 'goey-toast';
+import { notifications } from '@mantine/notifications';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { useState, useMemo, useEffect, useRef } from 'react';
 import JSZip from 'jszip';
@@ -259,7 +259,7 @@ export default function ToolLayout({
         navigate(route, { state: { chainFile: fileToChain } });
       }
     } catch {
-      gooeyToast.error('Gagal melanjutkan', { description: 'Gagal memuat hasil untuk alat berikutnya' });
+      notifications.show({ title: 'Gagal melanjutkan', message: 'Gagal memuat hasil untuk alat berikutnya', color: 'red', autoClose: 6000 });
     }
   };
 
