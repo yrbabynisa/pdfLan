@@ -87,16 +87,16 @@ describe('SSRF & LFI Security Guard Unit Tests', () => {
   });
 
   describe('isSafeSubrequest', () => {
-    test('should allow inline data and blob assets', () => {
-      expect(isSafeSubrequest('data:image/png;base64,abc...')).toBe(true);
-      expect(isSafeSubrequest('blob:http://example.com/uuid')).toBe(true);
+    test('should allow inline data and blob assets', async () => {
+      await expect(isSafeSubrequest('data:image/png;base64,abc...')).resolves.toBe(true);
+      await expect(isSafeSubrequest('blob:http://example.com/uuid')).resolves.toBe(true);
     });
 
-    test('should block local files or private network subrequests', () => {
-      expect(isSafeSubrequest('file:///C:/Windows/win.ini')).toBe(false);
-      expect(isSafeSubrequest('http://127.0.0.1:8080/token')).toBe(false);
-      expect(isSafeSubrequest('http://localhost:3000/api')).toBe(false);
-      expect(isSafeSubrequest('http://192.168.1.1/admin')).toBe(false);
+    test('should block local files or private network subrequests', async () => {
+      await expect(isSafeSubrequest('file:///C:/Windows/win.ini')).resolves.toBe(false);
+      await expect(isSafeSubrequest('http://127.0.0.1:8080/token')).resolves.toBe(false);
+      await expect(isSafeSubrequest('http://localhost:3000/api')).resolves.toBe(false);
+      await expect(isSafeSubrequest('http://192.168.1.1/admin')).resolves.toBe(false);
     });
   });
 });

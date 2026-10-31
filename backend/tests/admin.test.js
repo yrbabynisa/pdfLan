@@ -1,5 +1,7 @@
 process.env.NODE_ENV = 'test';
 process.env.ADMIN_PIN = '654321';
+// Disable the localhost admin bypass so requireAdminAuth is actually exercised (H3).
+process.env.LOCALHOST_ADMIN_BYPASS = 'false';
 
 jest.mock('../utils/binaries', () => ({
   libreOfficeConvert: jest.fn(),

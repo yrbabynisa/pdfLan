@@ -9,7 +9,11 @@ function parseSimpleMarkdown(md) {
     .replace(/^\> (.*$)/gim, '<blockquote>$1</blockquote>')
     .replace(/\*\*(.*?)\*\*/gim, '<strong>$1</strong>')
     .replace(/\*(.*?)\*/gim, '<em>$1</em>')
-    .replace(/\[(.*?)\]\((.*?)\)/gim, '<a href="$2">$1</a>')
+    .replace(/\[(.*?)\]\((.*?)\)/gim, (m, text, url) => {
+      // L2: block javascript:/data:/vbscript: URLs to prevent XSS via changelog links
+      if (/^\s*(javascript|data|vbscript):/i.test(url)) return text;
+      return `<a href="${url}" rel="noopener noreferrer">${text}</a>`;
+    })
     .replace(/\n/gim, '<br />');
 
   // Handle ul/li

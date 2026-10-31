@@ -37,11 +37,8 @@ services:
         reservations:
           cpus: "0.5"
           memory: "512M"
-    # Chromium needs these to run inside Docker
-    cap_add:
-      - SYS_ADMIN
-    security_opt:
-      - seccomp=unconfined
+    # M3: Chromium runs with --no-sandbox (see backend/routes.js), so it does NOT
+    # need SYS_ADMIN or seccomp=unconfined. Keep the container confined.
     logging:
       driver: "json-file"
       options:

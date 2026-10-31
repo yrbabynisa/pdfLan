@@ -1,4 +1,6 @@
-﻿const BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:3000/api';
+﻿// H1: default to same-origin '/api' so production (backend-served SPA) and the
+// Vite dev proxy both work without cross-origin requests / open CORS.
+const BASE_URL = import.meta.env.VITE_API_BASE_URL || '/api';
 
 class ApiError extends Error {
   constructor(message, status, response) {

@@ -21,7 +21,26 @@ fs.mkdirSync(TEMP_DIR, { recursive: true });
 fs.mkdirSync(OUTPUT_DIR, { recursive: true });
 
 // ── Middlewares ────────────────────────────────────────────────────
-app.use(cors());
+// H1: Restrict CORS via CORS_ORIGIN env instead of reflecting any origin.
+// Empty (default) = same-origin only; '*' = allow all; or a comma-separated list.
+const corsOriginRaw = (process.env.CORS_ORIGIN || '').trim();
+if (corsOriginRaw === '*') {
+  app.use(cors());
+} else if (corsOriginRaw) {
+  app.use(cors({ origin: corsOriginRaw.split(',').map(s => s.trim()).filter(Boolean), credentials: false }));
+} else {
+  app.use(cors({ origin: false }));
+}
+
+// L4: Minimal security headers without adding a dependency.
+app.use((req, res, next) => {
+  res.setHeader('X-Content-Type-Options', 'nosniff');
+  res.setHeader('X-Frame-Options', 'SAMEORIGIN');
+  res.setHeader('Referrer-Policy', 'no-referrer');
+  res.setHeader('Cross-Origin-Resource-Policy', 'same-origin');
+  next();
+});
+
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
@@ -51,9 +70,9 @@ app.get(/.*/, (req, res) => {
   }
 });
 
-// Global Error Handler
+// Global Error Handler — L1: log the full error, surface only the message
 app.use((err, req, res, next) => {
-  console.error('Server Error:', err.message);
+  console.error('Server Error:', err);
   res.status(err.status || 500).json({
     success: false,
     message: err.message || 'Terjadi kesalahan internal pada server.',
