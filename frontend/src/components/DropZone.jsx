@@ -145,16 +145,15 @@ export default function DropZone({
           {isError ? (
             <AlertCircle className={`${isCompact ? 'w-8 h-8' : 'w-10 h-10'} text-red-500 mb-3`} />
           ) : (
-            <button
-              type="button"
-              onClick={(e) => { e.stopPropagation(); onClick(); }}
+            <div
+              aria-hidden="true"
               className={`inline-flex items-center gap-3 bg-primary hover:bg-primary-hover text-white font-semibold transition-all shadow-xl shadow-primary/25 hover:shadow-primary/40 hover:-translate-y-0.5 ${
                 isCompact ? 'h-12 px-8 text-sm rounded-xl' : 'h-16 px-12 text-lg rounded-2xl'
               }`}
             >
               <Upload className={isCompact ? 'w-4 h-4' : 'w-5 h-5'} strokeWidth={2.5} />
               {isCompact ? (multiple ? 'Tambah File' : 'Ganti File') : 'Pilih File'}
-            </button>
+            </div>
           )}
 
           <p className={`text-text-muted ${isCompact ? 'mt-3 text-xs' : 'mt-5 text-base'}`}>
