@@ -1,4 +1,5 @@
 import { Component } from 'react';
+import { Button, Container, Stack, Text, ThemeIcon, Title } from '@mantine/core';
 
 export default class ErrorBoundary extends Component {
   constructor(props) {
@@ -17,21 +18,19 @@ export default class ErrorBoundary extends Component {
   render() {
     if (this.state.hasError) {
       return (
-        <div className="min-h-[60vh] flex flex-col items-center justify-center p-4 text-center">
-          <div className="text-red-500 mb-4 text-5xl">⚠️</div>
-          <h1 className="text-2xl font-bold text-white mb-2">Terjadi Kesalahan Tak Terduga</h1>
-          <p className="text-[#8b90b0] mb-6 max-w-md">
-            Aplikasi mengalami crash karena error pada komponen ini.
-            <br />
-            {this.state.error && this.state.error.toString()}
-          </p>
-          <button
-            onClick={() => window.location.reload()}
-            className="px-6 py-2.5 bg-[#e2001a] hover:bg-[#b8001a] text-white rounded-xl transition-colors font-medium"
-          >
-            Muat Ulang Halaman
-          </button>
-        </div>
+        <Container size="sm" className="min-h-[60vh] flex flex-col items-center justify-center text-center">
+          <Stack align="center" gap="md">
+            <ThemeIcon color="red" variant="light" size={56} radius="xl">
+              <span style={{ fontSize: 28 }}>⚠️</span>
+            </ThemeIcon>
+            <Title order={2}>Terjadi Kesalahan Tak Terduga</Title>
+            <Text c="dimmed" size="sm" maw={420}>
+              Aplikasi mengalami crash karena error pada komponen ini.
+              {this.state.error && (<><br /><code>{this.state.error.toString()}</code></>)}
+            </Text>
+            <Button color="red" onClick={() => window.location.reload()}>Muat Ulang Halaman</Button>
+          </Stack>
+        </Container>
       );
     }
     return this.props.children;

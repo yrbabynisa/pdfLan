@@ -1,6 +1,7 @@
 import ToolLayout from '../../components/ToolLayout';
 import useToolStore from '../../store/useToolStore';
 import { useState } from 'react';
+import { Radio, Stack, Text } from '@mantine/core';
 import { apiCompress } from '../../utils/api';
 import { formatFileSize } from '../../utils/fileHelpers';
 
@@ -40,20 +41,17 @@ export default function CompressPdf() {
       onProcessFile={handleProcessFile}
       actionLabel="Compress PDF"
       options={
-        <div className="space-y-2">
-          <label className="block text-xs text-text-muted mb-2">Level Kompresi</label>
-          {LEVELS.map(({ v, label, desc }) => (
-            <label key={v} className={`flex items-start gap-3 p-3 rounded-md border cursor-pointer transition-colors
-              ${level === v ? 'border-primary/50 bg-primary/5' : 'border-border hover:border-border-hover'}`}>
-              <input type="radio" name="level" value={v} checked={level === v} onChange={() => setLevel(v)} className="mt-0.5 accent-primary" />
-              <div>
-                <p className="text-xs font-semibold text-text-main">{label}</p>
-                <p className="text-[11px] text-text-muted">{desc}</p>
-              </div>
-            </label>
-          ))}
-          {files[0] && <p className="text-[11px] text-text-muted mt-2">Ukuran asli: {formatFileSize(files[0].size)}</p>}
-        </div>
+        <Stack gap="xs">
+          <Text size="xs" c="dimmed" mb={4}>Level Kompresi</Text>
+          <Radio.Group value={level} onChange={setLevel} name="level">
+            <Stack gap="xs">
+              {LEVELS.map(({ v, label, desc }) => (
+                <Radio key={v} value={v} label={label} description={desc} />
+              ))}
+            </Stack>
+          </Radio.Group>
+          {files[0] && <Text size="xs" c="dimmed" mt={4}>Ukuran asli: {formatFileSize(files[0].size)}</Text>}
+        </Stack>
       }
     />
   );

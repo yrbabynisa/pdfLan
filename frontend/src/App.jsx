@@ -2,6 +2,7 @@ import { BrowserRouter, Routes, Route, useLocation } from 'react-router-dom';
 import { GooeyToaster, gooeyToast } from 'goey-toast';
 import 'goey-toast/styles.css';
 import { lazy, Suspense, useEffect, useRef } from 'react';
+import { Loader } from '@mantine/core';
 import Navbar from './components/Navbar';
 import Footer from './components/Footer';
 import ErrorBoundary from './components/ErrorBoundary';
@@ -46,7 +47,7 @@ const TestUpload = lazy(() => import('./pages/TestUpload'));
 function PageLoader() {
   return (
     <div className="min-h-[60vh] flex items-center justify-center">
-      <div className="w-10 h-10 border-2 border-[#e2001a] border-t-transparent rounded-full animate-spin" />
+      <Loader color="red" size="lg" />
     </div>
   );
 }
