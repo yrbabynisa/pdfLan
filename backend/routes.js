@@ -68,7 +68,8 @@ const asyncHandler = (fn) => async (req, res, next) => {
     recordMetric(toolName, false, Date.now() - start, fileSize);
     console.error('API Error:', err);
     if (err.code === 'ENOENT') {
-      return res.status(500).json({ success: false, message: `Dependency tool tidak ditemukan. Pastikan path di file .env sudah benar. Error: ${err.message}` });
+      // L1: do not leak filesystem paths in the response.
+      return res.status(500).json({ success: false, message: 'Dependency tool tidak ditemukan di server. Periksa konfigurasi path binary.' });
     }
     res.status(500).json({ success: false, message: err.message || 'Terjadi kesalahan internal server' });
   } finally {
@@ -104,6 +105,16 @@ const fileSignatureCheck = async (req, res, next) => {
     if (ext === '.png' && !hex.startsWith('89504E47')) {
       await fsp.rm(req.file.path, { force: true });
       return res.status(400).json({ success: false, message: 'File signature tidak valid (bukan PNG asli).' });
+    }
+    // L3: OOXML (.docx/.pptx/.xlsx) are ZIP containers -> PK\x03\x04 (504B0304)
+    if (['.docx', '.pptx', '.xlsx'].includes(ext) && !hex.startsWith('504B0304')) {
+      await fsp.rm(req.file.path, { force: true });
+      return res.status(400).json({ success: false, message: 'File signature tidak valid (bukan file Office (OOXML) asli).' });
+    }
+    // L3: Legacy OLE CompoundDocument (.doc/.ppt/.xls) -> D0CF11E0
+    if (['.doc', '.ppt', '.xls'].includes(ext) && !hex.startsWith('D0CF11E0')) {
+      await fsp.rm(req.file.path, { force: true });
+      return res.status(400).json({ success: false, message: 'File signature tidak valid (bukan file Office (legacy) asli).' });
     }
     next();
   } catch (err) {
@@ -229,8 +240,11 @@ router.post('/convert/html-to-pdf', asyncHandler(async (req, res) => {
     
     // Aktifkan request interception untuk mencegah sub-resource mengakses internal network/file
     await page.setRequestInterception(true);
-    page.on('request', (interceptedRequest) => {
-      if (isSafeSubrequest(interceptedRequest.url())) {
+    // M1: re-resolve DNS for each subrequest to block hostnames that resolve to
+    // private/internal IPs (DNS rebinding / internal hostnames not in the static
+    // blocklist). isSafeSubrequest is async for this reason.
+    page.on('request', async (interceptedRequest) => {
+      if (await isSafeSubrequest(interceptedRequest.url())) {
         interceptedRequest.continue();
       } else {
         interceptedRequest.abort();

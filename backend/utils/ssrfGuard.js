@@ -171,9 +171,9 @@ async function validateUrlSafe(rawUrl) {
 }
 
 /**
- * Validasi sub-request Puppeteer
+ * Validasi sub-request Puppeteer (async: melakukan re-resolve DNS)
  */
-function isSafeSubrequest(reqUrl) {
+async function isSafeSubrequest(reqUrl) {
   try {
     const parsed = new URL(reqUrl);
     // Izinkan data: atau blob: untuk asset gambar inline
@@ -186,8 +186,20 @@ function isSafeSubrequest(reqUrl) {
     if (isBlockedHostname(parsed.hostname)) {
       return false;
     }
-    if (net.isIP(parsed.hostname) && isPrivateIp(parsed.hostname)) {
+    if (net.isIP(parsed.hostname)) {
+      return !isPrivateIp(parsed.hostname);
+    }
+    // M1: re-resolve DNS agar hostname yang resolve ke IP private/internal
+    // (DNS rebinding / hostname internal di luar blocklist statis) diblokir.
+    let addresses = [];
+    try {
+      addresses = await dns.lookup(parsed.hostname, { all: true });
+    } catch {
       return false;
+    }
+    if (!addresses || addresses.length === 0) return false;
+    for (const addr of addresses) {
+      if (isPrivateIp(addr.address)) return false;
     }
     return true;
   } catch {
